@@ -1352,6 +1352,8 @@ RtekJdetWorkItem(
 	WDFDEVICE Device = (WDFDEVICE)WdfWorkItemGetParentObject(WorkItem);
 	PRTEK_CONTEXT pDevice = GetDeviceContext(Device);
 
+	WdfInterruptAcquireLock(pDevice->Interrupt);
+
 	rt5682s_jackdetect(pDevice);
 
 	if (GetPlatform() == PlatformRyzenCezanne) { //Speakers are managed by jack driver on Cezanne
@@ -1362,6 +1364,10 @@ RtekJdetWorkItem(
 			StartStopSpeaker(pDevice, pDevice->HeadphonePlaying);
 		}
 	}
+
+	WdfInterruptReleaseLock(pDevice->Interrupt);
+
+	WdfObjectDelete(WorkItem);
 }
 
 BOOLEAN OnInterruptIsr(
